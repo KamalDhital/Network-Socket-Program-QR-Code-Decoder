@@ -1,123 +1,151 @@
-=======================================
-# PROGRAM NAME: QR Code Decoder Program
-=======================================
+# QR Code Decoder over TCP
 
-## PROGRAM OVERVIEW
-====================
-    This program provides a TCP-based QR Code Server and Client implementation in C, designed to:
-       - Handle the decoding of QR code images uploaded by clients.
-       - Support rate-limiting, timeout handling, and concurrency to prevent resource abuse.
-       - Log server events such as connections, disconnections, errors, and rate-limit violations.
-    The purpose is to familiarize with socket programming while exploring practical applications of networking and image decoding.
-----------------------------------------------------------------------------------------------------------------------------------
+A simple C socket-based application that lets a client send QR code image files to a server, which decodes them using the ZXing Java library and returns the result.
 
-## FEATURES
-============
-# QR Code Server:
-       1. Single-Threaded Base: Handles connections and processes requests sequentially.
-       2. QR Code Decoding: Decodes QR code files using the ZXing Java library.
-       3. Binary Transmission Support: Accepts QR code image files from clients.
-       4. Concurrency: Supports multiple clients using threads for parallel processing, supports 3 clients.
-       5. Rate-Limiting: Restricts the number of requests per client within a given timeframe. 
-       6. Timeout Handling: Disconnects idle clients after a specified timeout period.  Default: 90 seconds.
-       7. Logging: Logs all events, including connections, disconnections etc.
-       8. Security Features: Implements safeguards such as file size limits and protection against invalid data.
+## Overview
 
-# QR Code Client:
-       1. Connects to the server via TCP.
-       2. Sends files (binary QR code images) to the server.
-       3. Receives and displays server responses, including decoded QR code data or error messages.
-----------------------------------------------------------------------------------------------------------------
+This project demonstrates network programming in C with a server-client model. The server listens for incoming TCP connections, accepts QR code image files from connected clients, decodes them, and sends back the extracted data or an error message. It also includes basic protections such as rate limiting, timeout handling, and event logging.
 
-## REQUIREMENTS
-================
-#  Softwares:
-       1. Operating System: Linux (Recommended for socket programming and Java execution)
-       2. Compiler: GCC (with pthread support)
-       3. Java Runtime Environment: For executing the ZXing Java library
-                                
-# Libraries Used: 
-       1. Native C Libraries
-       2. ZXing Java library: Used to decode QR codes by server.
-                               - Download the javase.jar and core.jar files from the provided project resources.
-                               - Ensure Java is installed (install by this command for Ubuntu: sudo apt install default-jre).
-----------------------------------------------------------------------------------------------------------------------------
+## Features
 
-## PROGRAM STRUCTURE
-=====================
-      1. QRServer.c: Server Source Code      
-      2. QRClient.c: Client Source Code  
-      3. Makefile: Script for compiling the program. 
-      4. core.jar & javase.jar: ZXing library files for generating and decoding QR codes
-      5. test1.png,test2.png,test3.png,test4.png,test5.png,test6.png:  QR Code PNG file for testing
-      6. admin_log.txt: Log file created by the server for administrative log reports
-      7. README.txt: Documentation
--------------------------------------------------------------------------------------------------------------------------
+- TCP server and client communication in C
+- QR image decoding through ZXing Java command-line tooling
+- Concurrency support for multiple client connections
+- Per-client rate limiting
+- Idle connection timeout handling
+- Server-side logging for connections, errors, and violations
+- Simple command-line configuration for port, timeout, and limits
 
-## USAGE INSTRUCTION
-=====================
-# Compilation and Execution: 
-       All source code, Makefile, core.jar & javase.jar should be on both server and client OS directory for compilation.
-          - Compile program on Server and Client OS by the command: make all
-          - Compilation generates executable file for Server and Client i.e QRServer and QRClient
+## Requirements
 
-# Step 1 Start the Server:
-        Run the server program: ./QRServer -PORT <port-number> -MAX_USERS <max-clients> -RATE_MSGS <limit> -RATE_TIME <timeframe> -TIME_OUT <timeout>
-        
-        Server supports 3c oncurrency client connect at a time
-        The server listens on the default port 3600
+Before running the project, make sure you have:
 
-        e.g. => To run on specific port and other commands options: ./QRServer -PORT 2001 -MAX_USERS 3 -RATE_MSGS 5 -RATE_TIME 20 -TIME_OUT 30
- 
-# Step 2 Run the Client:
-          Run the client program: ./QRClient <server_ip> <server_port>
-          Make sure to match the port number on Server and Client.
-                           e.g. : ./QRClient 10.25.5.1 2001
-    
-# Step 3 Send a File:
-          The client will prompt these options once connected => Enter 'close' to disconnect, 'shutdown' to turn off server, or a QR code filename:
-          choose the commands option provided.
-          To Send QR code for decoding just enter the path of the QR code file: <filename>.png
-                                                                          e.g.:  test1.png
-          
-# Step 4 Receive Server Response:
-       The client receives the server's response, which will be Decoded QR code URL (if valid), or other messages.
------------------------------------------------------------------------------------------------------------------
+- Linux-based environment
+- GCC and Make
+- Java Runtime Environment (JRE)
+- ZXing Java libraries: `core.jar` and `javase.jar`
 
-## SAMPLE OUTPUT RESPONSES FROM SERVER  
-=======================================
-#  Sample of Server Response for Valid QR code:
-                                              Server Response:
-                                              SUCCESS (0): http://web.cs.wpi.edu/~cshue/cs3516/
+Install Java on Ubuntu with:
 
-# Sample of Server Response for Invalid QR code:
-                                              Server response:
-                                              FAILURE (1): Failed to decode QR Code or file error.
+```bash
+sudo apt update
+sudo apt install default-jre
+```
 
-# Sample of Server Response for Rate Limit Exceeds:
-                                             Server response:
-                                             RATE_LIMIT (3): Rate limit exceeded. Please wait before sending another requests.
+## Project Structure
 
-# Sample of Server Response for Time-out: 
-                                             Server Response:
-                                             TIMEOUT (2): Server timed out your connection.
--------------------------------------------------------------------------------------------------------------------------------
- 
-## LOGS
-========
-        The server creates administrative log reports file (i.e admin_log.txt) to record:
-          - Connections and disconnections.
-          - Rate-limit violations.
-          - Errors (e.g., invalid file size or decoding issues).
-          - Timeout events.
-     
-        => To view the logs: cat admin_log.txt
--------------------------------------------------------------------------------------------
+- `QRServer.c` — server source code
+- `QRClient.c` — client source code
+- `Makefile` — build script
+- `core.jar` — ZXing core library
+- `javase.jar` — ZXing Java SE library
+- `admin_log.txt` — generated server log file
+- `README.md` — project documentation
 
-## CLEANUP
-===========
-           To clean compiled binaries run: make clean 
+## Build
 
-===================================== *** The End *** ========================================
+From the project root, compile the server and client:
+
+```bash
+make all
+```
+
+To remove the compiled binaries:
+
+```bash
+make clean
+```
+
+## Run the Server
+
+```bash
+./QRServer -PORT <port-number> -MAX_USERS <max-clients> -RATE_MSGS <limit> -RATE_TIME <timeframe> -TIME_OUT <timeout>
+```
+
+Example:
+
+```bash
+./QRServer -PORT 2001 -MAX_USERS 3 -RATE_MSGS 5 -RATE_TIME 20 -TIME_OUT 30
+```
+
+### Supported Options
+
+| Option | Description |
+| --- | --- |
+| `-PORT` | Server port to listen on |
+| `-MAX_USERS` | Maximum number of simultaneous clients |
+| `-RATE_MSGS` | Number of requests allowed before rate limiting |
+| `-RATE_TIME` | Rate-limit time window in seconds |
+| `-TIME_OUT` | Client idle timeout in seconds |
+
+## Run the Client
+
+```bash
+./QRClient <server_ip> <server_port>
+```
+
+Example:
+
+```bash
+./QRClient 127.0.0.1 2001
+```
+
+The client will prompt for input. You can send:
+
+- a QR image filename such as `test1.png`
+- `close` to disconnect
+- `shutdown` to stop the server
+
+## Example Workflow
+
+1. Start the server:
+
+```bash
+./QRServer -PORT 3600 -MAX_USERS 3 -RATE_MSGS 2 -RATE_TIME 60 -TIME_OUT 90
+```
+
+2. Start the client:
+
+```bash
+./QRClient 127.0.0.1 3600
+```
+
+3. Enter a QR image file path, for example:
+
+```bash
+test1.png
+```
+
+4. The client receives the server response, which may be one of the following:
+
+- `SUCCESS (0): <decoded content>`
+- `FAILURE (1): Failed to decode QR Code or file error.`
+- `RATE_LIMIT (3): Rate limit exceeded.`
+- `TIMEOUT (2): Server timed out your connection.`
+
+## Logging
+
+The server writes timestamps and events to `admin_log.txt`. Logs include:
+
+- client connection and disconnection entries
+- rate-limit violations
+- decode and file errors
+- timeout events
+
+To view the log file:
+
+```bash
+cat admin_log.txt
+```
+
+## Notes
+
+- Ensure the ZXing JAR files are present in the same directory as the compiled executables.
+- The server expects valid QR image files and may reject oversized or invalid inputs.
+- This project is intended primarily as a learning example for socket programming and image decoding.
+
+## License
+
+This project is provided for educational use. Please check with the originating author or institution before using it in other contexts.
 
 
